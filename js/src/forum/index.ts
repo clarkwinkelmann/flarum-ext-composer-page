@@ -1,6 +1,7 @@
 import {extend, override} from 'flarum/common/extend';
 import app from 'flarum/forum/app';
 import LinkButton from 'flarum/common/components/LinkButton';
+import TextEditor from 'flarum/common/components/TextEditor';
 import listItems from 'flarum/common/helpers/listItems';
 import Composer from 'flarum/forum/components/Composer';
 import DiscussionComposer from 'flarum/forum/components/DiscussionComposer';
@@ -198,5 +199,16 @@ app.initializers.add('clarkwinkelmann-composer-page', () => {
         }
 
         return original();
+    });
+
+    // This method is exposed in FoF Upload for this specific reason
+    // We don't really need to check whether we are on the composer page, we can just return a new selector if the original returned nothing
+    // We target the editor and not the whole page to make sure it doesn't interfere with Formulaire upload fields
+    override(TextEditor.prototype, 'fofUploadDragAndDropTarget', function (original) {
+        const target = original();
+
+        if (!target) {
+            return this.$('.TextEditor-editor')[0];
+        }
     });
 });
