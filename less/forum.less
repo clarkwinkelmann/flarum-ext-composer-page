@@ -1,0 +1,40 @@
+@media @phone {
+    .ComposerPageContainer {
+        // Match Flarum mobile heading style
+        h2.App-titleControl {
+            font-weight: normal;
+            padding: 13px;
+        }
+
+        .sideNav {
+            // Hide the entire navigation on mobile, it's not needed
+            display: none;
+        }
+    }
+}
+
+.ComposerPage {
+    h2 {
+        margin-top: 0;
+    }
+
+    .ComposerBody-header .item-title {
+        display: none;
+    }
+
+    @media @phone {
+        // .App-primaryControl is normally in fixed position, but Flarum overrides it with !important in the composer
+        // We override it back to the original value otherwise the button disappears when scrolling down the page on mobile
+        .ComposerBody-editor .TextEditor-controls .item-submit {
+            position: fixed !important;
+        }
+    }
+}
+
+.ComposerPageMobileSubmit {
+    text-align: right;
+
+    @media @tablet-up {
+        display: none;
+    }
+}
