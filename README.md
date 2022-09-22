@@ -15,14 +15,18 @@ Extensions whose data is confirmed to be preserved when the composer switches fr
 - Flarum Tags
 - KILOWHAT Formulaire
 - Flamarkt Taxonomies (since version 0.1.5 of Taxonomies)
+- FriendsOfFlarum Polls (since version 1.2.0 of Polls)
+- FriendsOfFlarum Mason (since version 1.2.0 of Mason)
 
 Composer switch not supported:
 
-- FriendsOfFlarum Polls - [PR opened](https://github.com/FriendsOfFlarum/polls/pull/58)
-- FriendsOfFlarum Mason - [PR opened](https://github.com/FriendsOfFlarum/mason/pull/36)
 - FriendsOfFlarum Byobu - Cannot switch tags, so irrelevant. Byobu will use the composer page the same way as a discussion without tags does
 
-All extensions should be compatible when the feature is used globally for any tag.
+Extensions completely incompatible:
+
+- FriendsOfFlarum Upload - App crashes when trying to write discussion - [PR opened](https://github.com/FriendsOfFlarum/upload/pull/327)
+
+All other extensions should be compatible when the feature is used globally for any tag.
 
 Using the "Uniform discussion composer layout" option in KILOWHAT Formulaire makes the page even more complete by adding labels and horizontal layout styling to the full composer.
 
