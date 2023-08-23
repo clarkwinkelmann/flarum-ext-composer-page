@@ -17,5 +17,6 @@ return [
     new Extend\Locales(__DIR__ . '/locale'),
 
     (new Extend\Settings())
-        ->serializeToForum('composerPageTags', 'composer-page.onlyInTags'),
+        ->serializeToForum('composerPageTags', 'composer-page.onlyInTags')
+        ->serializeToForum('composerPagePrivateDiscussions', 'composer-page.forPrivateDiscussions'),
 ];

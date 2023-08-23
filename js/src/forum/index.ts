@@ -1,5 +1,6 @@
 import {extend, override} from 'flarum/common/extend';
 import app from 'flarum/forum/app';
+import Button from 'flarum/common/components/Button';
 import LinkButton from 'flarum/common/components/LinkButton';
 import listItems from 'flarum/common/helpers/listItems';
 import Composer from 'flarum/forum/components/Composer';
@@ -7,7 +8,6 @@ import DiscussionComposer from 'flarum/forum/components/DiscussionComposer';
 import IndexPage from 'flarum/forum/components/IndexPage';
 import ComposerState from 'flarum/forum/states/ComposerState';
 import ComposerPage from './components/ComposerPage';
-import Button from "flarum/common/components/Button";
 
 function isComposerPage(): boolean {
     const currentRouteName = (app.current.data as any).routeName;
@@ -58,9 +58,15 @@ app.initializers.add('clarkwinkelmann-composer-page', () => {
 
         const newHash = JSON.stringify(selectedTagSlugs);
 
+        // We don't need a check for private discussions here
+        // Since the Byobu composer doesn't have a control for tags, the hash will never change
         if (lastTagSelectionHash !== newHash) {
+            // Check if new tags selection needs the composer page
             if (app.composer.bodyMatches(DiscussionComposer) && shouldUsePage(selectedTagSlugs) && !isComposerPage()) {
-                app.composer.show();
+                // Don't switch page before the tags modal has closed otherwise it can never be closed again the next time it's opened
+                setTimeout(() => {
+                    app.composer.show();
+                }, 220); // Modal animation is 200ms by default, add a bit more for margin
             }
 
             lastTagSelectionHash = newHash;
@@ -69,6 +75,11 @@ app.initializers.add('clarkwinkelmann-composer-page', () => {
 
     override(ComposerState.prototype, 'show', function (original) {
         if (!this.bodyMatches(DiscussionComposer)) {
+            return original();
+        }
+        const PrivateDiscussionComposer = (flarum.extensions['fof-byobu'] as any)?.discussions?.PrivateDiscussionComposer;
+
+        if (PrivateDiscussionComposer && this.bodyMatches(PrivateDiscussionComposer) && !app.forum.attribute<string>('composerPagePrivateDiscussions')) {
             return original();
         }
 
@@ -125,6 +136,12 @@ app.initializers.add('clarkwinkelmann-composer-page', () => {
 
         // Don't replace button if guest, because that button will open the login modal in that situation
         if (!newDiscussion || !app.session.user) {
+            return;
+        }
+
+        // Do not modify Byobu's button
+        // This means there will be no "continue" button either but that's fine
+        if (newDiscussion.attrs.itemClassName?.indexOf('fof-byobu_primaryControl') !== -1) {
             return;
         }
 

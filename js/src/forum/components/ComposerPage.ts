@@ -11,6 +11,12 @@ import Tag from 'flarum/tags/common/models/Tag';
 // Copied from flarum-tags addTagFilter()
 const findTag = (slug: string) => app.store.all<Tag>('tags').find((tag) => tag.slug().localeCompare(slug, undefined, {sensitivity: 'base'}) === 0);
 
+function isPrivateDiscussion(): boolean {
+    const PrivateDiscussionComposer = (flarum.extensions['fof-byobu'] as any)?.discussions?.PrivateDiscussionComposer;
+
+    return PrivateDiscussionComposer && app.composer.bodyMatches(PrivateDiscussionComposer);
+}
+
 export default class ComposerPage extends Page {
     loading: boolean = false
     handlers: any = {}
@@ -45,7 +51,7 @@ export default class ComposerPage extends Page {
     oninit(vnode: any) {
         super.oninit(vnode);
 
-        app.setTitle(extractText(app.translator.trans('clarkwinkelmann-composer-page.forum.page.title')));
+        app.setTitle(extractText(app.translator.trans('clarkwinkelmann-composer-page.forum.page' + (isPrivateDiscussion() ? '-private' : '') + '.title')));
         app.setTitleCount(0);
 
         // Invoke the preloaded payload to get access to the current tag(s)
@@ -111,10 +117,14 @@ export default class ComposerPage extends Page {
     }
 
     view() {
-        return m('.ComposerPageContainer', m('.container', m('.sideNavContainer', [
+        const isPrivate = isPrivateDiscussion();
+
+        return m('.ComposerPageContainer', {
+            className: isPrivate ? 'ComposerPageContainer--private-discussion' : '',
+        }, m('.container', m('.sideNavContainer', [
             m('nav.IndexPage-nav.sideNav', m('ul', listItems(IndexPage.prototype.sidebarItems().toArray()))),
             m('.sideNavOffset', m('.ComposerPage', [
-                m('h2.App-titleControl', app.translator.trans('clarkwinkelmann-composer-page.forum.page.heading')),
+                m('h2.App-titleControl', app.translator.trans('clarkwinkelmann-composer-page.forum.page' + (isPrivate ? '-private' : '') + '.heading')),
                 this.body(),
             ])),
         ])));
@@ -139,6 +149,13 @@ export default class ComposerPage extends Page {
 
         $(window).on('resize', (this.handlers.onresize = this.updateHeight.bind(this)));
 
+        // We need to watch for changes to the content because it can change while editing:
+        // - When adding many tags it can span multiple lines
+        // - When adding or removing lines in Formulaire multi-entry fields
+        // - When Formulaire validation errors appear during submitting
+        this.handlers.observer = new ResizeObserver(this.updateHeight.bind(this));
+        this.handlers.observer.observe(this.element.querySelector('.ComposerBody-header'));
+
         // We need a little delay before the first height update because the TextEditor doesn't initialize the textarea in the same rendering thread
         setTimeout(() => {
             this.updateHeight();
@@ -149,6 +166,8 @@ export default class ComposerPage extends Page {
         super.onremove(vnode);
 
         $(window).off('resize', this.handlers.onresize);
+
+        this.handlers.observer.disconnect();
 
         // If we leave the page without quitting the composer, switch to the floating composer
         if (app.composer.bodyMatches(DiscussionComposer)) {
