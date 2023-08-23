@@ -20,7 +20,7 @@ Extensions whose data is confirmed to be preserved when the composer switches fr
 
 Composer switch not supported:
 
-- FriendsOfFlarum Byobu - Cannot switch tags, so irrelevant. Byobu will use the composer page the same way as a discussion without tags does
+- FriendsOfFlarum Byobu - Cannot switch tags, so irrelevant. There is a setting in the admin panel to choose whether Byobu will use the composer page
 
 Extensions completely incompatible:
 
