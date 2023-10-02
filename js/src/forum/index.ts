@@ -133,7 +133,7 @@ app.initializers.add('clarkwinkelmann-composer-page', () => {
     });
 
     extend(IndexPage.prototype, 'sidebarItems', function (items) {
-        const newDiscussion = items.get('newDiscussion');
+        const newDiscussion = items.has('newDiscussion') && items.get('newDiscussion');
 
         // Don't replace button if guest, because that button will open the login modal in that situation
         if (!newDiscussion || !app.session.user) {
